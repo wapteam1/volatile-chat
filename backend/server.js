@@ -1,4 +1,6 @@
 const http = require("http");
+const path = require("path");
+const express = require("express");
 const { WebSocketServer } = require("ws");
 const Redis = require("ioredis");
 const { v4: uuidv4 } = require("uuid");
@@ -13,17 +15,21 @@ const redis = new Redis(REDIS_URL, {
     maxRetriesPerRequest: null,
 });
 
-redis.on("connect", () => console.log("✅ Conectado a Redis (modo volátil)"));
-redis.on("error", (err) => console.error("❌ Redis error:", err.message));
+redis.on("connect", () => { /* connected */ });
+redis.on("error", () => { /* silent */ });
 
 // ─── Mapa de usuarios conectados: userId → WebSocket ─────────────────
 const clients = new Map();
 
-// ─── HTTP + WebSocket Server ─────────────────────────────────────────
-const server = http.createServer((_req, res) => {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", clients: clients.size }));
+// ─── Express + Static Files ──────────────────────────────────────────
+const app = express();
+app.use(express.static(path.join(__dirname, "..", "frontend")));
+app.get("/api/status", (_req, res) => {
+    res.json({ status: "ok", clients: clients.size });
 });
+
+// ─── HTTP + WebSocket Server ─────────────────────────────────────────
+const server = http.createServer(app);
 
 const wss = new WebSocketServer({ server });
 
@@ -50,7 +56,7 @@ wss.on("connection", (ws, req) => {
                 }
                 userId = msg.userId;
                 clients.set(userId, ws);
-                console.log(`👤 Registrado: ${userId}`);
+                // user registered
 
                 // Entregar mensajes pendientes que quedaron en Redis
                 await deliverPending(userId, ws);
@@ -103,7 +109,7 @@ wss.on("connection", (ws, req) => {
                     );
                 }
 
-                console.log(`💬 ${userId} → ${msg.to}: "${msg.content}" [${chatMessage.id}]`);
+                // No logging of message content — evidence-free zone
                 break;
             }
 
@@ -150,7 +156,7 @@ wss.on("connection", (ws, req) => {
                         })
                     );
 
-                    console.log(`👁️  ${userId} vio y borró mensaje ${msg.messageId}`);
+                    // seen event processed — no log
                 } else {
                     ws.send(
                         JSON.stringify({
@@ -208,7 +214,7 @@ wss.on("connection", (ws, req) => {
                     })
                 );
 
-                console.log(`👁️  ${userId} vio y borró ${allRaw.length} mensajes pendientes`);
+                // seen_all event processed — no log
                 break;
             }
 
@@ -226,11 +232,11 @@ wss.on("connection", (ws, req) => {
     ws.on("close", () => {
         if (userId) {
             clients.delete(userId);
-            console.log(`🔌 Desconectado: ${userId}`);
+            // client disconnected
         }
     });
 
-    ws.on("error", (err) => console.error("WS error:", err.message));
+    ws.on("error", () => { /* silent */ });
 });
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -252,7 +258,7 @@ async function deliverPending(userId, ws) {
                 count: messages.length,
             })
         );
-        console.log(`📨 Entregados ${messages.length} mensajes pendientes a ${userId}`);
+        // pending messages delivered — no log
     }
 }
 
@@ -282,6 +288,5 @@ async function deleteMessageFromRedis(userId, messageId) {
 
 // ─── Start ───────────────────────────────────────────────────────────
 server.listen(PORT, () => {
-    console.log(`🚀 Chat server escuchando en ws://localhost:${PORT}`);
-    console.log(`   Redis: ${REDIS_URL} (modo volátil, sin persistencia)`);
+    // Server running — no identifying logs
 });

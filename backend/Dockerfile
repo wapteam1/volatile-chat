@@ -3,11 +3,14 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Instalar dependencias primero (aprovecha cache de Docker)
-COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev 2>/dev/null || npm install --omit=dev
+COPY backend/package.json backend/package-lock.json* ./backend/
+RUN cd backend && (npm ci --omit=dev 2>/dev/null || npm install --omit=dev)
 
 # Copiar código fuente
-COPY . .
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
+
+WORKDIR /app/backend
 
 EXPOSE 3000
 

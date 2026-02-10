@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Wapnation — Inventory Management System 2026">
+  <title>Wapnation · Gestión de Inventario</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODE 1: WAPNATION DASHBOARD
+       ═══════════════════════════════════════════════════════ -->
+  <div id="wapnation-mode">
+
+    <!-- Top Bar -->
+    <header class="wap-topbar">
+      <div class="wap-logo" id="wap-logo">
+        <div class="wap-logo-icon">W</div>
+        <span class="wap-logo-text">Wapnation</span>
+      </div>
+
+      <div class="wap-search">
+        <span class="wap-search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar producto, SKU o categoría…" autocomplete="off">
+      </div>
+
+      <div class="wap-user">
+        <div class="wap-user-avatar">MA</div>
+        <span class="wap-user-name">Manager</span>
+      </div>
+    </header>
+
+    <!-- Stats Row -->
+    <section class="wap-stats">
+      <div class="stat-card">
+        <div class="stat-label">Ventas del mes</div>
+        <div class="stat-value">$4,287,500</div>
+        <span class="stat-delta up">↑ 12.4%</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Órdenes activas</div>
+        <div class="stat-value">1,342</div>
+        <span class="stat-delta up">↑ 8.1%</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Stock bajo alerta</div>
+        <div class="stat-value">23</div>
+        <span class="stat-delta down">↓ 3 items</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Devoluciones</div>
+        <div class="stat-value">17</div>
+        <span class="stat-delta down">↑ 2.3%</span>
+      </div>
+    </section>
+
+    <!-- Main: Table + Chart -->
+    <div class="wap-main">
+      <!-- Product Table -->
+      <div class="wap-table-wrap">
+        <div class="wap-table-header">
+          <span class="wap-table-title">Inventario de Productos</span>
+          <span class="wap-table-badge">142 productos</span>
+        </div>
+        <div class="wap-table-body">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="product-table-body">
+              <!-- Populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sales Chart -->
+      <div class="wap-chart-wrap">
+        <div class="wap-chart-header">
+          <div class="wap-chart-title">Ventas Semanales</div>
+          <div class="wap-chart-sub">Últimos 7 días · comparado con semana anterior</div>
+        </div>
+        <div class="wap-chart-body">
+          <canvas id="sales-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODE 2: GHOST CHAT
+       ═══════════════════════════════════════════════════════ -->
+  <div id="ghost-mode">
+
+    <!-- Password Overlay -->
+    <div class="ghost-password-overlay" id="ghost-password-overlay">
+      <div class="ghost-password-box">
+        <h3>🔐 ACCESO CIFRADO</h3>
+        <p>Ingresa tus datos para iniciar la sesión cifrada</p>
+        <input type="text" class="ghost-password-input" id="ghost-alias" placeholder="Tu alias" autocomplete="off" style="letter-spacing:0;margin-bottom:10px">
+        <input type="text" class="ghost-password-input" id="ghost-recipient" placeholder="Alias destinatario" autocomplete="off" style="letter-spacing:0;margin-bottom:10px">
+        <input type="password" class="ghost-password-input" id="ghost-password" placeholder="Clave de cifrado ••••••••" autocomplete="off">
+        <button class="ghost-password-btn" id="ghost-password-btn">Iniciar Sesión Segura</button>
+      </div>
+    </div>
+
+    <!-- Ghost Header -->
+    <header class="ghost-header">
+      <div class="ghost-title">
+        <span class="ghost-dot"></span>
+        GHOST CHAT
+        <span class="ghost-status">// modo búnker</span>
+      </div>
+      <div class="ghost-connection disconnected" id="ghost-conn-status">
+        ● Desconectado
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="ghost-messages" id="ghost-messages">
+      <div class="ghost-msg system">
+        ─── canal cifrado AES-256-GCM ───
+      </div>
+      <div class="ghost-msg system">
+        Los mensajes se autodestruyen 10s después de ser vistos
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="ghost-input-bar">
+      <span class="encrypted-badge">🔒 E2E</span>
+      <input type="text" class="ghost-input" id="ghost-input" placeholder="Mensaje cifrado…" autocomplete="off">
+      <button class="ghost-send-btn" id="ghost-send-btn">➤</button>
+    </div>
+  </div>
+
+
+  <!-- Scripts (order matters) -->
+  <script src="crypto-browser.js"></script>
+  <script src="ghost-chat.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>

@@ -45,11 +45,20 @@
     // ═════════════════════════════════════════════════════════
 
     document.addEventListener('DOMContentLoaded', () => {
-        renderProductTable();
-        renderSalesChart();
-        setupTriggers();
-        setupSecurity();
-        GhostChat.init();
+        try { renderProductTable(); } catch (e) { /* table render failed */ }
+        try { renderSalesChart(); } catch (e) { /* chart render failed */ }
+        try { setupTriggers(); } catch (e) { /* triggers failed */ }
+        try { setupSecurity(); } catch (e) { /* security failed */ }
+        try { GhostChat.init(); } catch (e) { /* ghost init failed */ }
+
+        // Re-render chart on resize/orientation change
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                try { renderSalesChart(); } catch (e) { /* chart resize failed */ }
+            }, 300);
+        });
     });
 
     // ═════════════════════════════════════════════════════════

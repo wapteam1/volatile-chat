@@ -56,6 +56,7 @@ const GhostChat = (() => {
 
     function init() {
         const d = dom();
+        if (!d.passwordBtn || !d.sendBtn || !d.input) return;
 
         d.passwordBtn.addEventListener('click', handlePasswordSubmit);
         d.passwordInput.addEventListener('keydown', (e) => {
@@ -71,15 +72,22 @@ const GhostChat = (() => {
         });
 
         // Photo button
-        d.photoBtn.addEventListener('click', () => d.photoInput.click());
-        d.photoInput.addEventListener('change', handlePhotoSelected);
+        if (d.photoBtn && d.photoInput) {
+            d.photoBtn.addEventListener('click', () => d.photoInput.click());
+            d.photoInput.addEventListener('change', handlePhotoSelected);
+        }
 
-        // Mic button — hold to record
-        d.micBtn.addEventListener('mousedown', startRecording);
-        d.micBtn.addEventListener('mouseup', stopRecording);
-        d.micBtn.addEventListener('mouseleave', stopRecording);
-        d.micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startRecording(); });
-        d.micBtn.addEventListener('touchend', (e) => { e.preventDefault(); stopRecording(); });
+        // Mic button — hold to record (only if MediaRecorder available)
+        if (d.micBtn && typeof MediaRecorder !== 'undefined') {
+            d.micBtn.addEventListener('mousedown', startRecording);
+            d.micBtn.addEventListener('mouseup', stopRecording);
+            d.micBtn.addEventListener('mouseleave', stopRecording);
+            d.micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startRecording(); }, { passive: false });
+            d.micBtn.addEventListener('touchend', (e) => { e.preventDefault(); stopRecording(); }, { passive: false });
+        } else if (d.micBtn) {
+            // Hide mic button if MediaRecorder is not available
+            d.micBtn.style.display = 'none';
+        }
     }
 
     function handlePasswordSubmit() {
@@ -266,7 +274,17 @@ const GhostChat = (() => {
         if (isRecording) return;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+            // Detect supported mimeType (iOS doesn't support webm)
+            let options = {};
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                options = { mimeType: 'audio/webm;codecs=opus' };
+            } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                options = { mimeType: 'audio/webm' };
+            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                options = { mimeType: 'audio/mp4' };
+            }
+            // else: let browser pick default
+            mediaRecorder = new MediaRecorder(stream, options);
             audioChunks = [];
             mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
             mediaRecorder.start();
@@ -284,7 +302,8 @@ const GhostChat = (() => {
 
         mediaRecorder.stop();
         mediaRecorder.onstop = async () => {
-            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const mimeType = mediaRecorder.mimeType || 'audio/webm';
+            const blob = new Blob(audioChunks, { type: mimeType });
             if (blob.size > MAX_MEDIA_BYTES) {
                 addSystemMessage('\u26A0 Audio muy largo (max 5MB)');
                 return;
@@ -386,7 +405,7 @@ const GhostChat = (() => {
                     <div class="ghost-audio-icon">&#127911;</div>
                     <div class="ghost-audio-label">Nota de voz</div>
                     <div class="tap-overlay"><span>Mantener para escuchar</span></div>
-                    <audio preload="auto"><source src="${content}" type="audio/webm"></audio>
+                    <audio preload="auto"><source src="${content}"></audio>
                 </div>`;
         } else {
             body = `<div>${escapeHtml(content)}</div>`;
@@ -514,6 +533,7 @@ const GhostChat = (() => {
     function activate() {
         const d = dom();
         d.ghostMode.classList.add('active');
+        document.body.classList.add('ghost-active');
 
         if (!sessionPassword) {
             d.passwordModal.classList.add('active');
@@ -526,6 +546,7 @@ const GhostChat = (() => {
 
     function deactivate() {
         document.getElementById('ghost-mode').classList.remove('active');
+        document.body.classList.remove('ghost-active');
         stopWatermark();
     }
 

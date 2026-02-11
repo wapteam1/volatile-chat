@@ -24,7 +24,11 @@ const clients = new Map();
 // ─── Express + Static Files ──────────────────────────────────────────
 const app = express();
 const FRONTEND_DIR = path.join(__dirname, "..", "frontend");
-app.use(express.static(FRONTEND_DIR));
+app.use(express.static(FRONTEND_DIR, {
+    maxAge: "1h",
+    etag: true,
+    lastModified: true,
+}));
 
 // ─── HTTP + WebSocket Server ─────────────────────────────────────────
 const server = http.createServer(app);

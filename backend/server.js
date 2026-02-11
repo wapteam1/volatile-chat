@@ -23,15 +23,13 @@ const clients = new Map();
 
 // ─── Express + Static Files ──────────────────────────────────────────
 const app = express();
-app.use(express.static(path.join(__dirname, "..", "frontend")));
-app.get("/api/status", (_req, res) => {
-    res.json({ status: "ok", clients: clients.size });
-});
+const FRONTEND_DIR = path.join(__dirname, "..", "frontend");
+app.use(express.static(FRONTEND_DIR));
 
 // ─── HTTP + WebSocket Server ─────────────────────────────────────────
 const server = http.createServer(app);
 
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ server, maxPayload: 5 * 1024 * 1024 }); // 5MB max
 
 wss.on("connection", (ws, req) => {
     let userId = null;
@@ -84,6 +82,7 @@ wss.on("connection", (ws, req) => {
                     from: userId,
                     to: msg.to,
                     content: msg.content,
+                    mediaType: msg.mediaType || 'text', // 'text' | 'image' | 'audio'
                     timestamp: Date.now(),
                 };
 
@@ -277,8 +276,10 @@ async function deleteMessageFromRedis(userId, messageId) {
         try {
             const parsed = JSON.parse(raw);
             if (parsed.id === messageId) {
-                // LREM elimina la primera ocurrencia exacta del valor
-                await redis.lrem(redisKey, 1, raw);
+                // LREM + immediate pipeline for instant RAM release
+                const pipeline = redis.pipeline();
+                pipeline.lrem(redisKey, 1, raw);
+                await pipeline.exec();
                 return parsed;
             }
         } catch { }
@@ -286,7 +287,12 @@ async function deleteMessageFromRedis(userId, messageId) {
     return null;
 }
 
+// ─── Catch-all: sirve index.html para cualquier ruta no definida ─────
+app.get("*", (_req, res) => {
+    res.sendFile(path.join(FRONTEND_DIR, "index.html"));
+});
+
 // ─── Start ───────────────────────────────────────────────────────────
-server.listen(PORT, () => {
-    // Server running — no identifying logs
+server.listen(PORT, "0.0.0.0", () => {
+    console.log("Búnker Wapnation cargado en puerto " + PORT);
 });

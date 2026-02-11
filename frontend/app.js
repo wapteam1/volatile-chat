@@ -81,10 +81,11 @@
 
     function renderSalesChart() {
         const canvas = document.getElementById('sales-chart');
-        const ctx = canvas.getContext('2d');
-
-        // HiDPI
+        if (!canvas) return;
         const rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width < 1 || rect.height < 1) return; // hidden or 0-size (mobile)
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
         const dpr = window.devicePixelRatio || 1;
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;

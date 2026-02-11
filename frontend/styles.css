@@ -2,7 +2,7 @@
    Wapnation + Ghost Chat — Styles
    ═══════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Fonts loaded via <link> in HTML to avoid render-blocking */
 
 /* ── Reset & Variables ─────────────────────────────────── */
 
@@ -48,6 +48,8 @@ html, body {
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ── Shared Utilities ──────────────────────────────────── */
@@ -635,4 +637,108 @@ tbody tr:hover td { background: var(--wap-surface-2); }
   white-space: nowrap;
   transform: rotate(-25deg);
   text-shadow: 0 0 8px rgba(0,255,136,.03);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE: MOBILE (<768px)
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* ── Body ─── allow scroll on dashboard ─────────────── */
+  html, body { overflow-y: auto; }
+
+  /* ── Wapnation Mode ─── scrollable column ───────────── */
+  #wapnation-mode {
+    position: relative;
+    inset: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* ── Top Bar ─── stack for mobile ───────────────────── */
+  .wap-topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .wap-search {
+    width: 100%;
+    order: 3;
+  }
+  .wap-user-name { display: none; }
+
+  /* ── Stats ─── 2 columns ───────────────────────────── */
+  .wap-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+  .stat-value { font-size: 20px; }
+  .stat-card { padding: 14px 16px; }
+
+  /* ── Main ─── single column, chart hidden ───────────── */
+  .wap-main {
+    grid-template-columns: 1fr;
+    padding: 0 16px 16px;
+    overflow: visible;
+  }
+  .wap-chart-wrap { display: none; }
+
+  /* ── Table ─── horizontal scroll ────────────────────── */
+  .wap-table-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 520px; }
+  thead th { padding: 10px 12px; font-size: 10px; }
+  tbody td { padding: 10px 12px; font-size: 12px; }
+
+  /* ── Ghost Header ──────────────────────────────────── */
+  .ghost-header { padding: 12px 16px; }
+  .ghost-title { font-size: 13px; gap: 8px; }
+  .ghost-status { display: none; }
+  .ghost-connection { font-size: 10px; }
+
+  /* ── Ghost Messages ────────────────────────────────── */
+  .ghost-messages { padding: 14px 12px; gap: 10px; }
+  .ghost-msg { max-width: 85%; padding: 10px 12px; font-size: 13px; }
+
+  /* ── Ghost Input Bar ─── compact ────────────────────── */
+  .ghost-input-bar {
+    gap: 6px;
+    padding: 10px 10px;
+    flex-wrap: nowrap;
+  }
+  .encrypted-badge { display: none; }
+  .ghost-media-btn { width: 34px; height: 34px; font-size: 14px; }
+  .ghost-input { padding: 10px 14px; font-size: 13px; min-width: 0; }
+  .ghost-send-btn { width: 38px; height: 38px; font-size: 16px; }
+
+  /* ── Password Modal ─── fit screen ──────────────────── */
+  .ghost-password-box {
+    width: calc(100vw - 32px);
+    max-width: 360px;
+    padding: 24px 20px;
+  }
+  .ghost-password-input { font-size: 13px; padding: 10px 14px; }
+
+  /* ── Tap-to-View ─── fit mobile ────────────────────── */
+  .tap-to-view .ghost-media-img {
+    max-width: 200px;
+    max-height: 160px;
+  }
+
+  /* ── Watermark ─── smaller on mobile ────────────────── */
+  .ghost-watermark { font-size: 11px; letter-spacing: 2px; }
+}
+
+/* ── Extra-small screens (<400px) ────────────────────────── */
+
+@media (max-width: 400px) {
+  .wap-stats { grid-template-columns: 1fr; }
+  .stat-value { font-size: 18px; }
+  .wap-logo-text { font-size: 15px; }
+  .wap-logo-icon { width: 32px; height: 32px; font-size: 15px; }
+  .ghost-title { font-size: 11px; }
+  .ghost-media-btn { width: 30px; height: 30px; font-size: 13px; }
+  .ghost-send-btn { width: 34px; height: 34px; font-size: 14px; }
+  .ghost-input { font-size: 12px; padding: 8px 10px; }
 }
